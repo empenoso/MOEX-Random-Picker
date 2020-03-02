@@ -1,5 +1,9 @@
 # MOEX-Random-Picker
-Picks a random stock from the 200+ stocks on the MOEX
+Picks a random stock from the 200+ stocks on the MOEX.
+
+Read this in other languages: [English](README.md), [Русский язык](README.ru.md).
+
+_______________
 
 # Live Website
 Website was built using bootstrap and vanilla JavaScript.
