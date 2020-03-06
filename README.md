@@ -5,7 +5,7 @@ Read this in other languages: [English](README.md), [Русский язык](RE
 
 _______________
 
-# Live Website
+# [Live Website](https://empenoso.github.io/MOEX-Random-Picker/)
 Website was built using bootstrap and vanilla JavaScript.
 
 _______________
