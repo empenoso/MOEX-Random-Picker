@@ -1,16 +1,382 @@
-<!doctype html>
-<html class="h-100">
+<!DOCTYPE html>
+<html class="zc-html">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="A simple tool to pick a random stock for you">
-    <meta name="author" content="">
-    <meta name="theme-color" content="#007bff">
-    <!-- <link rel="icon" href="favicon.ico"> -->
-    <title>MOEX - Random Picker</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-TEST
+  <meta charset="utf-8">
+  <title>ZingSoft Demo</title>
+  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+  <style>
+    .zc-html,
+    .zc-body {
+      height: 100%;
+      width: 100%;
+    }
+
+    #myChart {
+      height: 100%;
+      width: 100%;
+    }
+
+    .zc-ref {
+      display: none;
+    }
+  </style>
+</head>
+
+<body class="zc-body">
+
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+
+  <div id="myChart">
+    <a href="https://www.zingchart.com/" rel="noopener" class="zc-ref">Powered by ZingChart</a>
+  </div>
+
+  <script>
+    ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "b55b025e438fa8a98e32482b5f768ff5"];
+    // INIT
+    // -----------------------------
+    // Define Module Location
+    zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
+
+
+    // DEFINE CHART LOCATIONS (IDS)
+    // -----------------------------
+    // Main chart render location
+    var chartId = 'myChart';
+
+    // Constants
+    var palette = {
+      critical: ["#D31E1E", "#ea7a7a"],
+      standard: ["#29A2CC", "#7ecce7"],
+      project1: ["#7CA82B", "#b1e159"]
+    };
+    var projectNames = [];
+
+    // CHART DATA
+    // -----------------------------
+    var ganttData = [{
+        id: 'Market Research',
+        start: "10/2/15",
+        end: "10/10/15",
+        progress: "10%",
+        next: 'R&D',
+        type: 'standard'
+      },
+      {
+        id: 'R&D',
+        start: "10/14/15",
+        end: "10/28/15",
+        progress: 0.9,
+        slack: "10/30/15",
+        type: 'critical',
+      },
+      {
+        id: 'Funding',
+        start: "10/21/15",
+        end: "10/31/15",
+        progress: 0.2,
+        next: "Marketing",
+        type: 'critical',
+      },
+      {
+        id: 'Marketing',
+        start: "10/25/15",
+        end: "11/5/15",
+        progress: 0.9,
+        next: "Development",
+        type: 'standard'
+      },
+      {
+        id: 'Development',
+        start: "10/5/15",
+        end: "10/20/15",
+        progress: 0.7,
+        next: null,
+        type: 'critical'
+      },
+      {
+        id: 'Testing',
+        start: "10/15/15",
+        end: "10/18/15",
+        progress: 1,
+        next: null,
+        type: 'standard'
+      },
+      {
+        id: 'Beta Testing',
+        start: "10/8/15",
+        end: "10/16/15",
+        progress: 0.2,
+        next: null,
+        type: 'standard'
+      },
+      {
+        id: 'Release',
+        start: "10/15/15",
+        end: "10/18/15",
+        progress: 0.1,
+        slack: "10/19/15",
+        next: null,
+        type: 'project1'
+      }
+    ];
+
+
+    // CHART CONFIG
+    // -----------------------------
+    var myConfig = {
+      type: "line",
+      theme: 'light',
+      plot: {
+        lineWidth: 20,
+        marker: {
+          visible: false
+        },
+      },
+      globals: {
+        shadow: false
+      },
+      plotarea: {
+        maskTolerance: 80,
+        marginTop: "dynamic",
+        marginBottom: "50",
+        marginLeft: "dynamic",
+        marginRight: "dynamic",
+      },
+      scaleX: {
+        zooming: true,
+        placement: "opposite",
+        minValue: Date.parse("10/1/15"),
+        step: "day",
+        item: {},
+        guide: {
+          lineWidth: "1px"
+        },
+        tick: {
+          visible: false
+        },
+        transform: {
+          type: "date",
+          text: "%M-%d"
+        }
+      },
+      scaleY: {
+        itemsOverlap: true,
+        labels: projectNames,
+        offset: 25,
+        mirrored: true,
+        guide: {
+          visible: true,
+          lineWidth: 1,
+          lineStyle: "solid",
+          rules: [{
+            rule: "%v % 2 === 0",
+            visible: false
+          }]
+        },
+        minorTicks: 1,
+        minorTick: {
+          visible: false
+        },
+        tick: {
+          visible: false
+        }
+      },
+      series: createTimeline(ganttData)
+    };
+
+
+    // CALC LINE WIDTHS
+    // -----------------------------
+    calculateLineWidth(myConfig);
+
+
+    // RENDER CHART
+    // -----------------------------
+    zingchart.render({
+      id: chartId,
+      data: myConfig,
+      height: '100%',
+      width: '100%',
+      modules: 'dragging'
+    });
+
+
+    // RESIZE LISTENER
+    // -----------------------------
+    window.addEventListener('resize', function() {
+      calculateLineWidth(myConfig);
+      zingchart.resize = function(p) {
+        zingchart.exec(chartId, 'setdata', {
+          data: myConfig
+        });
+      };
+    }, {
+      passive: true
+    });
+
+
+    // HELPER FNS
+    // -----------------------------
+
+    function calculateLineWidth(dataset) {
+      var chart = document.getElementById(chartId);
+      var data = zingchart.exec(chartId, 'getdata');
+      var width = (chart.clientHeight - 50) / dataset.series.length;
+      dataset.plot.lineWidth = Math.floor(width);
+      dataset.plot.lineWidth = Math.min(dataset.plot.lineWidth, 50);
+    }
+
+    function createTimeline(arr) {
+      var series = [];
+      var scaleYIndex = 0;
+      var map = {};
+
+      for (var i = 0; i < arr.length; i++) {
+        // Convert date to ms
+        arr[i].start = Date.parse(arr[i].start);
+        arr[i].end = Date.parse(arr[i].end);
+        map[arr[i].id] = {
+          start: arr[i].start,
+          end: arr[i].end,
+          index: scaleYIndex
+        };
+
+        // Convert percent to float
+        if (typeof arr[i].progress === 'string') {
+          arr[i].progress = parseFloat(((arr[i].progress.slice(0, (arr[i].progress).length - 1) / 100)).toFixed(2));
+        }
+
+        if (arr[i].progress === 0) {
+          series.push({
+            values: [
+              [arr[i].start, scaleYIndex],
+              [arr[i].end, scaleYIndex]
+            ],
+            lineColor: palette[arr[i].type][1],
+            tooltip: {
+              text: arr[i].id + " : Not started"
+            }
+          })
+        } else if (arr[i].progress === 1) {
+          series.push({
+            values: [
+              [arr[i].start, scaleYIndex],
+              [arr[i].end, scaleYIndex]
+            ],
+            lineColor: palette[arr[i].type][0],
+            tooltip: {
+              text: arr[i].id + " : Completed"
+            },
+          })
+        } else {
+          var progressDate = arr[i].start + (arr[i].progress * (arr[i].end - arr[i].start));
+          var progressStart = {
+            values: [
+              [arr[i].start, scaleYIndex],
+              [progressDate, scaleYIndex]
+            ],
+            lineColor: palette[arr[i].type][0],
+            tooltip: {
+              text: arr[i].id + " \n Complete : " + ((arr[i].progress).toFixed(2) * 100) + "%" + "\n" + unixToDate(arr[i].start) + " to " + unixToDate(arr[i].end)
+            },
+            "data-dragging": true,
+          };
+          var progressEnd = {
+            values: [
+              [progressDate, scaleYIndex],
+              [arr[i].end, scaleYIndex]
+            ],
+            lineColor: palette[arr[i].type][1],
+            tooltip: {
+              text: arr[i].id + " \n Incomplete : " + ((1 - arr[i].progress).toFixed(2) * 100) + "%" + "\n" + unixToDate(arr[i].start) + " to " + unixToDate(arr[i].end)
+            },
+            "data-dragging": true,
+          };
+          //Reversed order for tooltip mapping
+          series.push(progressEnd);
+          series.push(progressStart);
+        }
+
+        if (arr[i].slack) {
+          //Draw a line from the end to the slack date.
+          var slack = {
+            values: [
+              [arr[i].end, scaleYIndex],
+              [Date.parse(arr[i].slack), scaleYIndex]
+            ],
+            lineColor: "#515151",
+            lineWidth: "1px",
+            tooltip: {
+              text: "Slack : " + arr[i].slack
+            }
+          };
+          series.push(slack);
+        }
+
+        projectNames[scaleYIndex - 1] = "";
+        projectNames[scaleYIndex] = arr[i].id;
+        scaleYIndex += 2;
+      }
+
+      // Loop through map and draw arrows
+      // Testing: Push a line from market research to R&D
+      for (var i = 0; i < arr.length; i++) {
+        var connector = {
+          lineWidth: "1px",
+          lineColor: "#3c3c3c",
+          lineStyle: "dashed",
+          shadow: false,
+          tooltip: {
+            text: ""
+          },
+          marker: {
+            type: 'triangle',
+            borderWidth: 0,
+            angle: 90,
+            rules: [{
+              rule: "%i == 5",
+              offsetX: -6,
+              size: 5,
+              visible: true,
+              backgroundColor: "#3c3c3c"
+            }]
+          }
+        };
+
+        if (arr[i].next) {
+          // Build connector line
+          var unit = 86400000; //day in ms
+          var values = [];
+          var current = map[arr[i].id];
+          var next = map[arr[i].next];
+          values.push([current.end, current.index]);
+          values.push([current.end + unit, current.index]);
+          connector.tooltip.text = "From " + arr[i].id + "\n to " + arr[i].next;
+          if (current.end > next.start) {
+            values.push([current.end + unit, current.index + 1]);
+            values.push([next.start - (unit), current.index + 1]);
+            values.push([next.start - (unit), next.index]);
+            values.push([next.start, next.index]);
+          } else {
+            values.push([current.end + unit, next.index]);
+            values.push([next.start - unit + unit, next.index]);
+            connector.marker.rules[0].rule = "%i == 3";
+          }
+          connector.values = values;
+          series.unshift(connector)
+        }
+      }
+
+      // Create dependency links
+      return series;
+    }
+
+    function unixToDate(unix) {
+      var date = new Date(unix);
+      return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+    }
+  </script>
+</body>
 
 </html>
