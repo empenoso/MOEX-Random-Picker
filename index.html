@@ -22,7 +22,7 @@
                     <div class="card-body">
                         <h1 id="ticker" class="card-title pricing-card-title">Загрузка...</h1>
                         <span id="proc">хx%</span>
-                        <span id="period">ГГГГ-ММ-ДД</span>                        
+                        <span id="period">с ...</span>                        
                         <a id="moex" target="_blank" rel="noopener" href="#">🏦 Мосбиржа</a>
                         <hr>
                         <input type="button" class="btn btn-lg btn-primary btn-block" id="refresh" value="Обновить" onclick="newStock(stocks)">
@@ -111,7 +111,7 @@
 
 
         function getCost(curStock, date) {
-            let urlCost = `http://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/${curStock}.json?iss.meta=off&iss.only=history&history.columns=SECID,TRADEDATE,CLOSE&limit=50&from=${date}`;
+            let urlCost = `https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/${curStock}.json?iss.meta=off&iss.only=history&history.columns=SECID,TRADEDATE,CLOSE&limit=50&from=${date}`;
             return urlCost;
 
         }
