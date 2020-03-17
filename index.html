@@ -10,6 +10,21 @@
     <!-- <link rel="icon" href="favicon.ico"> -->
     <title>MOEX - Random Picker</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: darkslategrey;
+        }
+
+        #foot {
+            position: absolute;
+            bottom: 10px
+        }
+
+        .white {
+            color: white !important;
+        }
+    </style>
+</head>
 
 <body class="h-100">
     <div class="container h-100 justify-content-center">
@@ -22,7 +37,7 @@
                     <div class="card-body">
                         <h1 id="ticker" class="card-title pricing-card-title">Загрузка...</h1>
                         <span id="proc">хx%</span>
-                        <span id="period">с ...</span>                        
+                        <span id="period">с ...</span>
                         <a id="moex" target="_blank" rel="noopener" href="#">🏦 Мосбиржа</a>
                         <hr>
                         <input type="button" class="btn btn-lg btn-primary btn-block" id="refresh" value="Обновить" onclick="newStock(stocks)">
@@ -117,22 +132,8 @@
         }
     </script>
 
-    <style>
-        body {
-            background-color: darkslategrey;
-        }
+    <!-- Yandex.Metrika counter --> <script type="text/javascript" > (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)}; m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)}) (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym"); ym(61087024, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true }); </script> <noscript><div><img src="https://mc.yandex.ru/watch/61087024" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
 
-        #foot {
-            position: absolute;
-            bottom: 10px
-        }
-
-        .white {
-            color: white !important;
-        }
-    </style>
-    
-<!-- Yandex.Metrika counter --> <script type="text/javascript" > (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)}; m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)}) (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym"); ym(61087024, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true }); </script> <noscript><div><img src="https://mc.yandex.ru/watch/61087024" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
-   
 </body>
+
 </html>
