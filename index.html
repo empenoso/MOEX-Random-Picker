@@ -1,382 +1,136 @@
-<!DOCTYPE html>
-<html class="zc-html">
+<!doctype html>
+<html class="h-100" lang="ru">
 
 <head>
-  <meta charset="utf-8">
-  <title>ZingSoft Demo</title>
-  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
-  <style>
-    .zc-html,
-    .zc-body {
-      height: 100%;
-      width: 100%;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A simple tool to pick a random stock for you">
+    <meta name="author" content="">
+    <meta name="theme-color" content="#007bff">
+    <!-- <link rel="icon" href="favicon.ico"> -->
+    <title>MOEX - Random Picker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-    #myChart {
-      height: 100%;
-      width: 100%;
-    }
+<body class="h-100">
+    <div class="container h-100 justify-content-center">
+        <div class="row h-100 card-deck text-center justify-content-center align-items-center">
+            <div class="col-lg-4">
+                <div class="card box-shadow">
+                    <div class="card-header">
+                        <h4 class="my-0 font-weight-normal">Русская рулетка 🎯</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 id="ticker" class="card-title pricing-card-title">Загрузка...</h1>
+                        <span id="proc">хx%</span>
+                        <span id="period">ГГГГ-ММ-ДД</span>                        
+                        <a id="moex" target="_blank" rel="noopener" href="#">🏦 Мосбиржа</a>
+                        <hr>
+                        <input type="button" class="btn btn-lg btn-primary btn-block" id="refresh" value="Обновить" onclick="newStock(stocks)">
+                    </div>
+                </div>
+            </div>
+            <span id="foot">
+                <small class="col-lg-12 text-center white">Made by
+                    <a class="white font-italic" href="tg://resolve?domain=ppirks">ppirks</a>,
+                    <a class="white font-italic" href="https://habr.com/ru/post/492382/">empenoso</a>
+                </small>
+            </span>
+        </div>
+    </div>
+    <script>
+        let urls = [
+            'https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?iss.meta=off&iss.only=securities&securities.columns=SECID',
+            'https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQDE/securities.json?iss.meta=off&iss.only=securities&securities.columns=SECID'
+            //'https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQTF/securities.json?iss.meta=off&iss.only=securities&securities.columns=SECID'
+        ];
+        let stocks = [];
+        let requests = urls.map(url =>
+            fetch(url)
+        )
+        Promise.all(requests)
+            .then(responses => {
+                return (responses)
+            }).then(responses => Promise.all(responses.map(res => {
+                res.json().then(function(result) {
+                    let values = result.securities.data
+                    stocks.push(...values)
+                    newStock(stocks);
+                });
+            })))
 
-    .zc-ref {
-      display: none;
-    }
-  </style>
-</head>
+        // let curStock = "";
+        // newStock(stocks);
+        // console.log(stocks.length);  
 
-<body class="zc-body">
+        function newStock(stocks) {
+            let random = Math.floor(Math.random() * Math.floor(stocks.length));
+            curStock = stocks[random];
+            console.log(curStock)
+            document.querySelector("#ticker").innerText = curStock;
+            document.querySelector("#moex").href = "https://www.moex.com/ru/issue.aspx?board=TQBR&code=" + curStock;
+            now = new Date();
+            dateRequestNow = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate() - 1}`;
+            console.log(dateRequestNow);
+            dateRequestPre = `${now.getFullYear() - 5}-${now.getMonth() + 1}-${now.getDate() - 1}`;
+            console.log(dateRequestPre);
 
-  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+            fetch(getCost(curStock, dateRequestPre)).then(result => {
 
-  <div id="myChart">
-    <a href="https://www.zingchart.com/" rel="noopener" class="zc-ref">Powered by ZingChart</a>
-  </div>
-
-  <script>
-    ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "b55b025e438fa8a98e32482b5f768ff5"];
-    // INIT
-    // -----------------------------
-    // Define Module Location
-    zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
-
-
-    // DEFINE CHART LOCATIONS (IDS)
-    // -----------------------------
-    // Main chart render location
-    var chartId = 'myChart';
-
-    // Constants
-    var palette = {
-      critical: ["#D31E1E", "#ea7a7a"],
-      standard: ["#29A2CC", "#7ecce7"],
-      project1: ["#7CA82B", "#b1e159"]
-    };
-    var projectNames = [];
-
-    // CHART DATA
-    // -----------------------------
-    var ganttData = [{
-        id: 'Market Research',
-        start: "10/2/15",
-        end: "10/10/15",
-        progress: "10%",
-        next: 'R&D',
-        type: 'standard'
-      },
-      {
-        id: 'R&D',
-        start: "10/14/15",
-        end: "10/28/15",
-        progress: 0.9,
-        slack: "10/30/15",
-        type: 'critical',
-      },
-      {
-        id: 'Funding',
-        start: "10/21/15",
-        end: "10/31/15",
-        progress: 0.2,
-        next: "Marketing",
-        type: 'critical',
-      },
-      {
-        id: 'Marketing',
-        start: "10/25/15",
-        end: "11/5/15",
-        progress: 0.9,
-        next: "Development",
-        type: 'standard'
-      },
-      {
-        id: 'Development',
-        start: "10/5/15",
-        end: "10/20/15",
-        progress: 0.7,
-        next: null,
-        type: 'critical'
-      },
-      {
-        id: 'Testing',
-        start: "10/15/15",
-        end: "10/18/15",
-        progress: 1,
-        next: null,
-        type: 'standard'
-      },
-      {
-        id: 'Beta Testing',
-        start: "10/8/15",
-        end: "10/16/15",
-        progress: 0.2,
-        next: null,
-        type: 'standard'
-      },
-      {
-        id: 'Release',
-        start: "10/15/15",
-        end: "10/18/15",
-        progress: 0.1,
-        slack: "10/19/15",
-        next: null,
-        type: 'project1'
-      }
-    ];
-
-
-    // CHART CONFIG
-    // -----------------------------
-    var myConfig = {
-      type: "line",
-      theme: 'light',
-      plot: {
-        lineWidth: 20,
-        marker: {
-          visible: false
-        },
-      },
-      globals: {
-        shadow: false
-      },
-      plotarea: {
-        maskTolerance: 80,
-        marginTop: "dynamic",
-        marginBottom: "50",
-        marginLeft: "dynamic",
-        marginRight: "dynamic",
-      },
-      scaleX: {
-        zooming: true,
-        placement: "opposite",
-        minValue: Date.parse("10/1/15"),
-        step: "day",
-        item: {},
-        guide: {
-          lineWidth: "1px"
-        },
-        tick: {
-          visible: false
-        },
-        transform: {
-          type: "date",
-          text: "%M-%d"
-        }
-      },
-      scaleY: {
-        itemsOverlap: true,
-        labels: projectNames,
-        offset: 25,
-        mirrored: true,
-        guide: {
-          visible: true,
-          lineWidth: 1,
-          lineStyle: "solid",
-          rules: [{
-            rule: "%v % 2 === 0",
-            visible: false
-          }]
-        },
-        minorTicks: 1,
-        minorTick: {
-          visible: false
-        },
-        tick: {
-          visible: false
-        }
-      },
-      series: createTimeline(ganttData)
-    };
-
-
-    // CALC LINE WIDTHS
-    // -----------------------------
-    calculateLineWidth(myConfig);
-
-
-    // RENDER CHART
-    // -----------------------------
-    zingchart.render({
-      id: chartId,
-      data: myConfig,
-      height: '100%',
-      width: '100%',
-      modules: 'dragging'
-    });
-
-
-    // RESIZE LISTENER
-    // -----------------------------
-    window.addEventListener('resize', function() {
-      calculateLineWidth(myConfig);
-      zingchart.resize = function(p) {
-        zingchart.exec(chartId, 'setdata', {
-          data: myConfig
-        });
-      };
-    }, {
-      passive: true
-    });
-
-
-    // HELPER FNS
-    // -----------------------------
-
-    function calculateLineWidth(dataset) {
-      var chart = document.getElementById(chartId);
-      var data = zingchart.exec(chartId, 'getdata');
-      var width = (chart.clientHeight - 50) / dataset.series.length;
-      dataset.plot.lineWidth = Math.floor(width);
-      dataset.plot.lineWidth = Math.min(dataset.plot.lineWidth, 50);
-    }
-
-    function createTimeline(arr) {
-      var series = [];
-      var scaleYIndex = 0;
-      var map = {};
-
-      for (var i = 0; i < arr.length; i++) {
-        // Convert date to ms
-        arr[i].start = Date.parse(arr[i].start);
-        arr[i].end = Date.parse(arr[i].end);
-        map[arr[i].id] = {
-          start: arr[i].start,
-          end: arr[i].end,
-          index: scaleYIndex
-        };
-
-        // Convert percent to float
-        if (typeof arr[i].progress === 'string') {
-          arr[i].progress = parseFloat(((arr[i].progress.slice(0, (arr[i].progress).length - 1) / 100)).toFixed(2));
+                    return (result.json())
+                })
+                .then(res => {
+                    let infoPre = res.history.data.filter(data => data[2] != null);
+                    console.log(infoPre)
+                    let costPre = infoPre[0][2]
+                    let datePre = infoPre[0][1]
+                    document.querySelector("#period").innerText = `c ${datePre}`
+                    console.log(costPre)
+                    console.log(datePre)
+                    return (costPre)
+                })
+                .then(costPre => {
+                    fetch(getCost(curStock, dateRequestNow)).then(result => {
+                            return (result.json())
+                        })
+                        .then(res => {
+                            console.log(res);
+                            let infoNow = res.history.data.filter(data => data[2] != null);
+                            let costNow = infoNow[0][2]
+                            let dateNow = infoNow[0][1]
+                            console.log(costNow);
+                            console.log(dateNow);
+                            console.log(((costNow * 100) / costPre) - 100)
+                            let proc = ((costNow * 100) / costPre) - 100;
+                            document.querySelector("#proc").innerText = `${proc.toFixed(2) }%`;
+                            // document.querySelector("#period").innerText = `c ${datePre}`;
+                        })
+                })
+            document.querySelector("#ticker").innerText = curStock;
+            document.querySelector("#moex").href = "https://www.moex.com/ru/issue.aspx?board=TQBR&code=" + curStock;
         }
 
-        if (arr[i].progress === 0) {
-          series.push({
-            values: [
-              [arr[i].start, scaleYIndex],
-              [arr[i].end, scaleYIndex]
-            ],
-            lineColor: palette[arr[i].type][1],
-            tooltip: {
-              text: arr[i].id + " : Not started"
-            }
-          })
-        } else if (arr[i].progress === 1) {
-          series.push({
-            values: [
-              [arr[i].start, scaleYIndex],
-              [arr[i].end, scaleYIndex]
-            ],
-            lineColor: palette[arr[i].type][0],
-            tooltip: {
-              text: arr[i].id + " : Completed"
-            },
-          })
-        } else {
-          var progressDate = arr[i].start + (arr[i].progress * (arr[i].end - arr[i].start));
-          var progressStart = {
-            values: [
-              [arr[i].start, scaleYIndex],
-              [progressDate, scaleYIndex]
-            ],
-            lineColor: palette[arr[i].type][0],
-            tooltip: {
-              text: arr[i].id + " \n Complete : " + ((arr[i].progress).toFixed(2) * 100) + "%" + "\n" + unixToDate(arr[i].start) + " to " + unixToDate(arr[i].end)
-            },
-            "data-dragging": true,
-          };
-          var progressEnd = {
-            values: [
-              [progressDate, scaleYIndex],
-              [arr[i].end, scaleYIndex]
-            ],
-            lineColor: palette[arr[i].type][1],
-            tooltip: {
-              text: arr[i].id + " \n Incomplete : " + ((1 - arr[i].progress).toFixed(2) * 100) + "%" + "\n" + unixToDate(arr[i].start) + " to " + unixToDate(arr[i].end)
-            },
-            "data-dragging": true,
-          };
-          //Reversed order for tooltip mapping
-          series.push(progressEnd);
-          series.push(progressStart);
+
+        function getCost(curStock, date) {
+            let urlCost = `http://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/${curStock}.json?iss.meta=off&iss.only=history&history.columns=SECID,TRADEDATE,CLOSE&limit=50&from=${date}`;
+            return urlCost;
+
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: darkslategrey;
         }
 
-        if (arr[i].slack) {
-          //Draw a line from the end to the slack date.
-          var slack = {
-            values: [
-              [arr[i].end, scaleYIndex],
-              [Date.parse(arr[i].slack), scaleYIndex]
-            ],
-            lineColor: "#515151",
-            lineWidth: "1px",
-            tooltip: {
-              text: "Slack : " + arr[i].slack
-            }
-          };
-          series.push(slack);
+        #foot {
+            position: absolute;
+            bottom: 10px
         }
 
-        projectNames[scaleYIndex - 1] = "";
-        projectNames[scaleYIndex] = arr[i].id;
-        scaleYIndex += 2;
-      }
-
-      // Loop through map and draw arrows
-      // Testing: Push a line from market research to R&D
-      for (var i = 0; i < arr.length; i++) {
-        var connector = {
-          lineWidth: "1px",
-          lineColor: "#3c3c3c",
-          lineStyle: "dashed",
-          shadow: false,
-          tooltip: {
-            text: ""
-          },
-          marker: {
-            type: 'triangle',
-            borderWidth: 0,
-            angle: 90,
-            rules: [{
-              rule: "%i == 5",
-              offsetX: -6,
-              size: 5,
-              visible: true,
-              backgroundColor: "#3c3c3c"
-            }]
-          }
-        };
-
-        if (arr[i].next) {
-          // Build connector line
-          var unit = 86400000; //day in ms
-          var values = [];
-          var current = map[arr[i].id];
-          var next = map[arr[i].next];
-          values.push([current.end, current.index]);
-          values.push([current.end + unit, current.index]);
-          connector.tooltip.text = "From " + arr[i].id + "\n to " + arr[i].next;
-          if (current.end > next.start) {
-            values.push([current.end + unit, current.index + 1]);
-            values.push([next.start - (unit), current.index + 1]);
-            values.push([next.start - (unit), next.index]);
-            values.push([next.start, next.index]);
-          } else {
-            values.push([current.end + unit, next.index]);
-            values.push([next.start - unit + unit, next.index]);
-            connector.marker.rules[0].rule = "%i == 3";
-          }
-          connector.values = values;
-          series.unshift(connector)
+        .white {
+            color: white !important;
         }
-      }
-
-      // Create dependency links
-      return series;
-    }
-
-    function unixToDate(unix) {
-      var date = new Date(unix);
-      return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
-    }
-  </script>
+    </style>
 </body>
 
 </html>
