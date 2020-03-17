@@ -10,4 +10,4 @@ Website was built using bootstrap and vanilla JavaScript.
 
 _______________
 
-Based on [RayBB / random-stock-picker](https://github.com/RayBB/random-stock-picker)
+Based on [RayBB / random-stock-picker](https://github.com/RayBB/random-stock-picker).
