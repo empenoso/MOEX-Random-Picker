@@ -5,7 +5,7 @@ Read this in other languages: [English](README.md), [Русский язык](RE
 
 _______________
 
-# [Живая демонстрация](https://empenoso.github.io/MOEX-Random-Picker/)
+# [Живая демонстрация](https://codepen.io/empenoso/pen/poJmJZg)
 Весь код написан на чистом JavaScript и файл index.html работает как с компьютера, так и с мобильного устройства.
 
 _______________
