@@ -1,5 +1,6 @@
 # MOEX-Random-Picker
 Picks a random stock from the 200+ stocks on the MOEX.
+Shows Return for the last n years.
 
 Read this in other languages: [English](README.md), [Русский язык](README.ru.md).
 
